@@ -1,6 +1,6 @@
 from random import randint
 
-from constraints import NonNegativeSolutionConstraint, IntSolutionConstraint, LambdaConstraint
+from constraints import *
 
 operator_dict = dict([(0, " + "),
                       (1, " - "),
@@ -72,7 +72,6 @@ def generate(numOperators=1, constraints=[]):
 def satisfied_constraints(infoDict, constraints=[]):
     for constraint in constraints:
         success = constraint(infoDict)
-        print(constraint, success)
         if not success:
             return False
     return True
@@ -88,7 +87,11 @@ def game_loop(constraints=[]):
         print(solution)
 
 def test_game_loop():
-    constraints = [NonNegativeSolutionConstraint(), IntSolutionConstraint(), LambdaConstraint(lambda infoDict: infoDict["solution"] > 20)]
+    constraints = [LambdaConstraint(lambda infoDict: infoDict["solution"] == 0),
+                   NoZeroMultiplicationConstraint(), 
+                   NonNegativeSolutionConstraint(), 
+                   IntSolutionConstraint(),
+                   ]
     game_loop(constraints)
 
 def generate_prototype_problems():
