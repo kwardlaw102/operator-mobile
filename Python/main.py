@@ -1,5 +1,7 @@
 from random import randint
 
+from constraints import NonNegativeSolutionConstraint, IntSolutionConstraint, LambdaConstraint
+
 operator_dict = dict([(0, " + "),
                       (1, " - "),
                       (2, " * "),
@@ -29,10 +31,10 @@ def batch_generate_problems(num_problems, num_operators):
         solutions.append(eval_string + " = " + str(int(solution)))
     return problems, solutions
 
-def generate(numOperators=1):
+def generate(numOperators=1, constraints=[]):
     failed_generate = True
 
-    while failed_generate:
+    while True:
         # problem must have at least 1 operator
         if numOperators < 1:
             print("number of operators must be greater than 1")
@@ -55,27 +57,39 @@ def generate(numOperators=1):
             continue
 
         # exit loop if valid problem was generated
-        if is_valid_solution(solution):
-            failed_generate = False
+        #if is_valid_solution(solution):
+        #    break
+
+        infoDict = dict([("numbers", numbers),
+                        ("operators", operators),
+                        ("solution", solution),
+                        ])
+        if satisfied_constraints(infoDict, constraints):
+            break
     
     return numbers, operators, eval_string, solution
 
-def is_valid_solution(solution):
-    if int(solution) != solution:
-        return False
-    if solution < 0:
-        return False
+def satisfied_constraints(infoDict, constraints=[]):
+    for constraint in constraints:
+        success = constraint(infoDict)
+        print(constraint, success)
+        if not success:
+            return False
     return True
 
-def game_loop():
+def game_loop(constraints=[]):
     play_again = True
     while play_again:
         numOperators = int(input("Enter a number of operators greater than zero: "))
         print("Generating problem with " + str(numOperators) + " operators...")
-        numbers, operators, eval_string, solution = generate(numOperators)
+        numbers, operators, eval_string, solution = generate(numOperators, constraints)
         #print(eval_string)
         print(generate_eval_string(numbers, operators, "_"))
         print(solution)
+
+def test_game_loop():
+    constraints = [NonNegativeSolutionConstraint(), IntSolutionConstraint(), LambdaConstraint(lambda infoDict: infoDict["solution"] > 20)]
+    game_loop(constraints)
 
 def generate_prototype_problems():
     problems = []
@@ -107,8 +121,8 @@ def generate_prototype_problems():
         f.close()
 
 if __name__ == "__main__":
-    #game_loop()
-    generate_prototype_problems()
+    test_game_loop()
+    #generate_prototype_problems()
     
 
 # TODO: each operator has a priority (1, 2, 3, 4); USER sets the priority to place parentheses
