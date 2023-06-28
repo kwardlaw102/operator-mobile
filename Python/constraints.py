@@ -26,3 +26,46 @@ class NoZeroMultiplicationConstraint:
                 hasZeroNumber = True
                 break
         return not (zeroSolution and hasZeroNumber)
+    
+class HasOperatorsConstraint:
+    def __init__(self, *required_operators):
+        self.required_operators = required_operators
+
+    def __call__(self, infoDict):
+        for required_operator in self.required_operators:
+            if not required_operator in infoDict["operators"]:
+                return False
+        return True
+    
+class HasNumbersConstraint:
+    def __init__(self, *required_numbers):
+        self.required_numbers = required_numbers
+
+    def __call__(self, infoDict):
+        for required_number in self.required_numbers:
+            if not required_number in infoDict["numbers"]:
+                return False
+        return True
+
+# TODO: throw exception if not enough operators or numbers for constraints
+
+class Or:
+    def __init__(self, *constraints):
+        self.constraints = constraints
+    
+    def __call__(self, infoDict):
+        return any([constraint(infoDict) for constraint in self.constraints])
+    
+class And:
+    def __init__(self, *constraints):
+        self.constraints = constraints
+
+    def __call__(self, infoDict):
+        return all([constraint(infoDict) for constraint in self.constraints])
+    
+class Not:
+    def __init__(self, constraint):
+        self.constraint = constraint
+    
+    def __call__(self, infoDict):
+        return not self.constraint(infoDict)

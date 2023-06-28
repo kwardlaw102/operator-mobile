@@ -1,31 +1,39 @@
-from random import randint
+from random import randrange, randint
+from enum import IntEnum
 
 from constraints import *
 
-operator_dict = dict([(0, " + "),
-                      (1, " - "),
-                      (2, " * "),
-                      (3, " / ")])
+class Operator(IntEnum):
+    ADD = 0
+    SUBTRACT = 1
+    MULTIPLY = 2
+    DIVIDE = 3
+
+operator_dict = dict([(Operator.ADD, " + "),
+                      (Operator.SUBTRACT, " - "),
+                      (Operator.MULTIPLY, " * "),
+                      (Operator.DIVIDE, " / ")])
 
 def generate_numbers(numNumbers):
     return [randint(0, 9) for _ in range(numNumbers)]
 
 def generate_operators(numOperators):
-    return [operator_dict[randint(0, 3)] for _ in range(numOperators)]
+    return [randrange(0, len(Operator)) for _ in range(numOperators)]
+    #return [operator_dict[randrange(0, len(Operator))] for _ in range(numOperators)]
 
 def generate_eval_string(numbers, operators, whitespace=None):
     eval_string = ""
     for i in range(len(operators)):
         eval_string += str(numbers[i])
-        eval_string += str(operators[i]) if whitespace is None else str(whitespace)
+        eval_string += operator_dict[operators[i]] if whitespace is None else str(whitespace)
     eval_string += str(numbers[len(numbers)-1])
     return eval_string
 
-def batch_generate_problems(num_problems, num_operators):
+def batch_generate_problems(num_problems, num_operators, constraints=[]):
     problems = []
     solutions = []
     for i in range(num_problems):
-        numbers, operators, eval_string, solution = generate(num_operators)
+        numbers, operators, eval_string, solution = generate(num_operators, constraints)
         full_string = generate_eval_string(numbers, operators, " _ ") + " = " + str(solution)
         problems.append(full_string)
         solutions.append(eval_string + " = " + str(solution))
@@ -126,9 +134,18 @@ def generate_prototype_problems():
         f.close()
 
 if __name__ == "__main__":
-    test_game_loop()
+    constraints = [HasOperatorsConstraint(Operator.DIVIDE, Operator.SUBTRACT),
+                   Not(Or(HasNumbersConstraint(2, 7), HasNumbersConstraint(1, 9))),
+                   IntSolutionConstraint(),
+                   ]
+    _, s = batch_generate_problems(10, 2, constraints)
+    for problem in s:
+        print(problem)
+    #test_game_loop()
     #generate_prototype_problems()
     
 
 # TODO: each operator has a priority (1, 2, 3, 4); USER sets the priority to place parentheses
 # if priority is not set, order of operations will be followed
+
+# TODO: add timeout to generation function
