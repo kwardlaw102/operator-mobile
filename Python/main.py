@@ -26,9 +26,9 @@ def batch_generate_problems(num_problems, num_operators):
     solutions = []
     for i in range(num_problems):
         numbers, operators, eval_string, solution = generate(num_operators)
-        full_string = generate_eval_string(numbers, operators, " _ ") + " = " + str(int(solution))
+        full_string = generate_eval_string(numbers, operators, " _ ") + " = " + str(solution)
         problems.append(full_string)
-        solutions.append(eval_string + " = " + str(int(solution)))
+        solutions.append(eval_string + " = " + str(solution))
     return problems, solutions
 
 def generate(numOperators=1, constraints=[]):
@@ -55,6 +55,8 @@ def generate(numOperators=1, constraints=[]):
         except ZeroDivisionError:
             #print("Division by zero")
             continue
+        if (solution == int(solution)):
+            solution = int(solution) # remove unnecessary decimal in string representation of whole numbers
 
         # exit loop if valid problem was generated
         #if is_valid_solution(solution):
