@@ -1,5 +1,6 @@
 from random import randint, randrange, choice
 from enum import IntEnum
+from itertools import product
 
 class Operator(IntEnum):
     ADD = 0
@@ -35,11 +36,37 @@ class Problem:
             output += " = " + str(self.solution())
         return output
     
+    # may raise ZeroDivisionError
     def solution(self):
         solution = eval(self.full_str())
         if solution == int(solution):
             solution = int(solution) # remove unnecessary decimal in string representation of whole numbers
         return solution
+    
+    def num_answers(self):
+        output = 0
+        options = product(list(Operator), repeat=len(self.operators))
+        for answer in options:
+            try:
+                if self.is_correct_answer(answer):
+                    output += 1
+                else:
+                    pass
+            except ZeroDivisionError:
+                continue
+        return output
+    
+    def is_correct_answer(self, operators):
+        problem = Problem()
+        problem.numbers = self.numbers
+        problem.operators = operators
+        return problem.solution() == self.solution()
+
+    def num_options(self):
+        return len(Operator) ** len(self.operators)
+    
+    def guess_probability(self):
+        return self.num_answers() / self.num_options # does not represent "hints" given by problem structure (e.g. large solution suggests multiplication is needed)
     
     def satisfies_constraints(self, constraints):
         return all([constraint(self) for constraint in constraints])
@@ -79,6 +106,7 @@ if __name__ == "__main__":
     for _ in range(10):
         problem = Problem.generate(num_operators = 3)
         print(problem.full_str(with_solution = True))
+        print("num solutions: " + str(problem.num_answers()) + "/" + str(problem.num_options()) + "\n")
 
     print("---")
     from constraints import NonNegativeSolutionConstraint, IntSolutionConstraint
@@ -86,3 +114,4 @@ if __name__ == "__main__":
     for _ in range(10):
         problem = Problem.generate(num_operators = 2, constraints = constraints)
         print(problem.full_str(with_solution = True))
+        print("num solutions: " + str(problem.num_answers()) + "/" + str(problem.num_options()) + "\n")
