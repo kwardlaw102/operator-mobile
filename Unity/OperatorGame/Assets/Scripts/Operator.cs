@@ -10,6 +10,7 @@ public enum Operator
     Divide
 }
 
+
 // Based on following link:
 // https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/how-to-create-a-new-method-for-an-enumeration
 public static class OperatorExtensions
